@@ -37,3 +37,17 @@ Plus ou moins, une slab represente une collections de pages continue, et le cach
 Par contre un cache ne peut stockerqu'un type de kernel object (fd, semaphores, file objects)
 
 - C'est quoi la fragmentation et dans quelle mesure est ce que la slab allocation l'empeche ?
+
+### Objet kernel
+
+- À ne pas oublier :
+
+ - Taille fixe
+
+ - Typage fort (struct précise)
+
+ - Alignement
+
+ - Réutilisation après free
+
+ - Lien avec vulnérabilités (UAF, type confusion)
