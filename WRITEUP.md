@@ -4,9 +4,9 @@
 1. [Intro](#Intro)
 2. [Composants](#Composants)
 
-    2.1 [Objet kernel](#Objet-Kernel)
+    2.1 [Objet kernel](#Objet-kernel)
     
-    2.2 [Slab](#SlabSlab)
+    2.2 [Slab](#Slab)
     
     2.3 [Cache](#Cache)
 3. [Le slab allocator](#Le-slab-allocator)
