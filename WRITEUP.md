@@ -11,7 +11,7 @@
     2.3 [Cache](#Cache)
 3. [Le slab allocator](#Le-slab-allocator)
 4. [Points importants et contraintes](#Points-importants-et-contraintes)
-5. [Use-cases et utilité](#Use-cases-et-utilite)
+5. [Use-cases et utilité](#Use-cases-et-utilité)
 
 
 ## Intro
