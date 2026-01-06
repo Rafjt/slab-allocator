@@ -30,14 +30,6 @@ ___
 
 ## [Vulgarisation du fonctionnement en vidéo](https://www.youtube.com/watch?v=rsp0rBP61As)
 
-### Questions -> Réponses
-- Est-ce que le cache référence les slab comme une sorte de pointeur ? 
-Plus ou moins, une slab represente une collections de pages continue, et le cache représente une collection de slabs DONC:
-    - Si on un **S1** et **S2** qui sont 2 slabs distinctes, ces dernières peuvent être rassembler dans le cache on aura, **C = S1 + S2**
-Par contre un cache ne peut stockerqu'un type de kernel object (fd, semaphores, file objects)
-
-- C'est quoi la fragmentation et dans quelle mesure est ce que la slab allocation l'empeche ?
-
 ### Objet kernel
 
 - À ne pas oublier :
@@ -51,3 +43,24 @@ Par contre un cache ne peut stockerqu'un type de kernel object (fd, semaphores, 
  - Réutilisation après free
 
  - Lien avec vulnérabilités (UAF, type confusion)
+
+ ### Slab
+
+- Ensemble de pages physiques
+
+- États (full / partial / free)
+
+- Métadonnées (selon SLAB / SLUB)
+
+- Relation avec le cache
+
+- Localité mémoire
+
+### Questions -> Réponses
+- Est-ce que le cache référence les slab comme une sorte de pointeur ? 
+Plus ou moins, une slab represente une collections de pages continue, et le cache représente une collection de slabs DONC:
+    - Si on un **S1** et **S2** qui sont 2 slabs distinctes, ces dernières peuvent être rassembler dans le cache on aura, **C = S1 + S2**
+Par contre un cache ne peut stockerqu'un type de kernel object (fd, semaphores, file objects)
+
+- C'est quoi la fragmentation et dans quelle mesure est ce que la slab allocation l'empeche ?
+
