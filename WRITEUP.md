@@ -23,6 +23,9 @@ Parmi ces mécanismes, le slab allocator occupe une place clé. Introduit pour o
 Ce write-up a pour objectif de détailler le fonctionnement interne du slab allocator : sa structure, ses principaux composants (caches, slabs, objets), ainsi que le cycle de vie d’une allocation et d’une libération. L’accent sera mis sur les mécanismes concrets utilisés par le noyau, afin de fournir une compréhension exploitable aussi bien pour l’analyse de performances que pour la recherche et l’exploitation de vulnérabilités.
 
 ## Composants
+> Avant d’entrer dans le détail du fonctionnement global du slab allocator, il est nécessaire de présenter les différentes briques qui le composent. 
+
+> Le modèle du slab repose sur une hiérarchie de structures clairement définies, allant de l’objet kernel individuel jusqu’aux caches qui organisent leur allocation. Comprendre le rôle et les interactions entre ces composants est essentiel pour appréhender à la fois les choix de conception de l’allocateur et les comportements observables lors des allocations, des libérations et des réutilisations d’objets en mémoire.
 
 ### Objet kernel :
 `à compléter...`
