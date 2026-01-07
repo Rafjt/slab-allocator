@@ -74,6 +74,12 @@ Cette discipline est respectée par le code kernel normal, mais elle n’est pas
 
     - élévation de privilèges
 
+3. Alignement
+
+Les objets kernel sont soumis à des contraintes d’alignement mémoire, imposées par l’architecture, les exigences de performance et certains champs internes (Pointeurs, listes chaînées, etc...). Dans notre cas le slab allocator garantira que chaque objet soit correctement aligné et respecte les contraintes nécessaires à son type, ce qui améliore la localité cache, les performances et **très important** la fiabilité des accès concurrents
+
+Mais cela rend aussi l’agencement mémoire hautement prédictible, ce qui est un point clé du point de vue de la sécurité.
+
 `à compléter...`
 
 ### Slab
