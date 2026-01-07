@@ -56,6 +56,40 @@ ___
 
 - Localité mémoire
 
+### Cache
+
+- Un cache = un type d’objet
+
+- kmem_cache_create
+
+- aramètres importants (size, flags, ctor)
+
+- Caches génériques (kmalloc-*)
+
+- Rôle central en exploitation
+
+### Le slab allocator
+
+- Création du cache
+
+- Allocation (kmem_cache_alloc)
+
+- Libération (kmem_cache_free)
+
+- Réutilisation d’un objet
+
+- (Optionnel) Différences SLAB / SLUB / SLOB -> mais que si on a du temps vue qu'on est censé ce focus linux 
+
+### Points importants et contraintes
+
+- Typage strict
+
+- Pas d’allocations arbitraires
+
+- Effets des flags (redzone, poisoning, freelist hardening)
+
+- Impact KASAN / CONFIG options
+
 ### Questions -> Réponses
 - Est-ce que le cache référence les slab comme une sorte de pointeur ? 
 Plus ou moins, une slab represente une collections de pages continue, et le cache représente une collection de slabs DONC:
