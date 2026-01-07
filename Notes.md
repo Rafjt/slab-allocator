@@ -90,6 +90,14 @@ ___
 
 - Impact KASAN / CONFIG options
 
+### Use-cases et utilité
+
+2 gros aspects: 
+
+- Parler performance avec chiffres
+
+- Parler exploitation concrètes
+
 ### Questions -> Réponses
 - Est-ce que le cache référence les slab comme une sorte de pointeur ? 
 Plus ou moins, une slab represente une collections de pages continue, et le cache représente une collection de slabs DONC:
