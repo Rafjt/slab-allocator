@@ -42,7 +42,17 @@ ____
 
 Un objet kernel est une instance en mémoire d’une structure interne du noyau Linux. Il représente une ressource, un état ou un mécanisme du système, et est généralement manipulé via un pointeur vers une struct spécifique.
 
-`ajouter des exemples...`
+Parmis les plus commune:
+
+`struct task_struct` = processus / thread
+
+`struct file` = fichier ouvert
+
+`struct inode` = métadonnées d’un fichier
+
+`struct socket` = struct sock → socket réseau
+
+`struct semaphore` = → synchronisation
 
 Ces objets sont strictement internes au noyau et ne sont jamais directement exposés à l’espace utilisateur, même si ce dernier peut indirectement provoquer leur création ou leur destruction via des appels système.
 ____
@@ -80,7 +90,17 @@ Les objets kernel sont soumis à des contraintes d’alignement mémoire, impos�
 
 Mais cela rend aussi l’agencement mémoire hautement prédictible, ce qui est un point clé du point de vue de la sécurité.
 
-`à compléter...`
+4. Réutilisation après free
+
+La réutilisation après free est un pilier du modèle slab. Lorsqu’un objet kernel est libéré, sa mémoire n’est généralement pas rendue immédiatement au système, elle est replacée dans la freelist du cache correspondant et peut être réallouée très rapidement pour un nouvel objet du même type. En conséquence, deux allocations successives du même type peuvent retourner exactement la même adresse, et la mémoire peut conserver des valeurs résiduelles si des mécanismes de durcissement ne sont pas activés. Cette réutilisation agressive offre des performances élevées, mais elle introduit des risques de sécurité majeurs.
+
+---
+> Objet kernel
+#### Conclusion
+
+Dans le cadre de l’étude du slab allocator et de la sécurité du noyau Linux, les objets kernel constituent le point d’entrée principal pour comprendre comment la mémoire du noyau est structurée, pourquoi certaines primitives d’exploitation sont possibles et comment la performance et la sécurité peuvent entrer en tension.
+
+La combinaison de plusieurs caractéristiques comme la taille fixe, typage fort mais non vérifié à l’exécution, réutilisation rapide et disposition mémoire prévisible fait des objets kernel une cible privilégiée pour les attaques. En parallèle, ces mêmes propriétés en font une abstraction idéale pour optimiser la gestion mémoire du noyau.
 
 ### Slab
 `à compléter...`
