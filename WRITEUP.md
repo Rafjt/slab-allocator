@@ -207,8 +207,95 @@ Le slab constitue une brique intermédiaire essentielle entre les objets kernel 
 
 Cependant, cette organisation structurée et prévisible, combinée à la réutilisation rapide des objets, fait du slab un élément central dans l’analyse et l’exploitation des vulnérabilités du noyau Linux. Comprendre le rôle et le fonctionnement des slabs est donc indispensable avant d’aborder la notion de cache et, plus largement, le fonctionnement global du slab allocator.
 
-### Cache
-`à compléter...`
+> Cache
+
+#### Définition:
+
+Un **cache** (ou *slab cache*) est une structure de gestion représentant un type précis d’objet kernel. Il regroupe un ensemble de slabs et des règles d’allocation et de libération ainsi que les paramètres propres à l’objet (taille, alignement, flags, constructeur, etc.). Chaque cache est strictement associé à **un type d’objet kernel**. Lorsqu’une allocation est demandée, le noyau ne travaille jamais directement avec des slabs, mais toujours via un cache.
+
+---
+
+> Cache
+
+#### Création et cycle de vie:
+
+Les caches peuvent être **statiques** (créés au démarrage du noyau) ou **dynamiques** (créés à l’exécution via `kmem_cache_create`)
+
+Lors de la création d’un cache, plusieurs paramètres critiques sont définis :
+
+- la taille exacte de l’objet
+- les contraintes d’alignement
+- les flags de sécurité ou de performance
+- un éventuel constructeur, appelé à l’initialisation de l’objet
+
+Une fois créé, un cache allouera des slabs à la demande, recyclera les objets libérés et pourra libérer des slabs vides si la pression mémoire augmente
+
+---
+
+> Cache
+
+#### Organisation interne:
+
+Un cache maintient plusieurs listes de slabs, classées selon leur état, full, partial ou empty. Lorsqu’une allocation est demandée, le cache cherche d’abord un slab partiellement rempli, si aucun n’est disponible, il en utilise un vide, voire en alloue un nouveau si nécessaire. Cette organisation hiérarchique permet d’optimiser le temps d’allocation, de favoriser la réutilisation des objets et de maîtriser la consommation mémoire globale.
+
+---
+
+> Cache
+
+#### Spécificités
+
+**1. Un cache par type d’objet** ***(TRES IMPORTANT)**
+
+Chaque cache correspond à un type précis d’objet kernel.
+Ce qui garantit :
+
+- une homogénéité totale des objets
+- une gestion simplifiée
+- une forte prédictibilité du comportement mémoire
+
+Cette propriété est fondamentale pour le fonctionnement du slab allocator, mais elle est également déterminante du point de vue de l’exploitation.
+
+**2. Caches génériques (`kmalloc-*`)**
+
+En plus des caches dédiés à des structures précises, Linux fournit des caches génériques , par exemple: 
+
+* `kmalloc-8`
+* `kmalloc-16`
+* `kmalloc-32`
+* …
+* `kmalloc-4096`
+
+Ces caches servent aux allocations dynamiques qui ne nécessitent pas de type strict, à la création de buffers temporaires, ainsi qu’à certaines structures internes plus flexibles. Ils occupent une place centrale dans de nombreuses vulnérabilités, car ils peuvent provoquer des confusions de type entre objets de tailles compatibles.
+
+**3. Flags et options de sécurité**
+
+Les caches peuvent être configurés avec différents flags qui influencent leurs performances, leur comportement mémoire et leur niveau de durcissement. Parmi ces options, on trouve par exemple les redzones, le poisoning, le freelist hardening ou encore les vérifications de débordement. Ces mécanismes renforcent la sécurité et compliquent l’exploitation d’erreurs, sans pour autant éliminer totalement les vulnérabilités liées au slab allocator.
+
+
+**4. Réutilisation et prévisibilité**
+
+Comme pour les slabs, les caches favorisent une réutilisation rapide des objets, lorsqu’un objet est libéré, il retourne dans le cache, et une nouvelle allocation peut parfois récupérer exactement la même adresse. Ce fonctionnement rend les comportements mémoire répétables, mesurables et donc potentiellement exploitables dans certains contextes de sécurité.
+
+---
+
+> Cache
+
+#### Lien avec les vulnérabilités
+
+
+Le cache constitue souvent le point d’entrée principal dans les scénarios d’exploitation du noyau Linux. En cas de vulnérabilité de type use-after-free, c’est le cache qui détermine quel type d’objet peut être réalloué. Un attaquant peut ainsi tenter de forcer la réallocation d’un objet qu’il contrôle, ce qui fait de la taille et de la structure du cache des paramètres critiques. Les caches `kmalloc-*` sont particulièrement intéressants à ce titre, puisqu’ils peuvent héberger simultanément des objets de nature différente mais de taille identique, ouvrant la voie à des confusions de type particulièrement puissantes.
+
+De plus, le contrôle du remplissage des caches, qui une technique connue sous le nom de "heap grooming" permet d’influencer la disposition des objets en mémoire, de synchroniser des allocations concurrentes et de rendre des primitives d’exploitation à la fois plus fiables et plus reproductibles.
+
+
+---
+> Cache
+
+#### Conclusion
+
+Le cache constitue la couche de gestion la plus élevée du slab allocator. Il définit les règles, les politiques et les contraintes associées à un type d’objet kernel donné, tout en orchestrant l’utilisation des slabs sous-jacents.
+
+Si les objets kernel représentent la cible et les slabs le conteneur physique, le cache est le **chef d’orchestre** de l’allocation mémoire. Sa compréhension est indispensable pour analyser les performances du noyau Linux, mais surtout pour comprendre et exploiter les vulnérabilités liées à la gestion du heap kernel.
 
 ## Le slab allocator
 
