@@ -170,20 +170,17 @@ Cela signifie que tous les objets à l’intérieur ont la même taille, le mêm
 
 Cette homogénéité simplifie grandement la gestion mémoire et permet une réutilisation extrêmement rapide des objets libérés.
 
----
 **2. Alignement**
 Les slabs sont faits pour améliorer la localité cache. Les objets sont donc placés les uns à côté des autres en mémoire, ce qui fait que le processeur peut y accéder plus vite. L’alignement respecte les contraintes de l’architecture, donc il n’y a pas de perte de performance. Et comme les accès successifs tombent souvent sur les mêmes lignes de cache, tout devient plus rapide et efficace.
 
 Ce qui améliore significativement les performances, en particulier pour des structures très utilisées comme les `struct file` ou `struct inode`.
 
----
 **3. Réutilisation agressive**
 
 Lorsqu’un objet est libéré, il retourne simplement dans la freelist du slab, où il peut être réutilisé immédiatement. Cependant, il n’est pas forcément réinitialisé complètement, sans mécanismes de durcissement spécifiques certaine données précédentes peuvent rester en mémoire.
 
 Cette réutilisation rapide est l’un des principaux atouts du slab allocator, mais elle a également un impact direct sur la sécurité.
 
----
 **4. Prévisibilité mémoire**
 
 Les slabs apportent une organisation mémoire à la fois structurée, répétable et relativement prévisible. Du point de vue des performances, c’est un atout majeur, car cette régularité facilite la gestion et l’accès aux objets. En revanche, du point de vue de la sécurité, cette même prévisibilité peut devenir un avantage pour un attaquant, elle lui permet de forcer la réallocation d’un objet précis, de contrôler l’occupation des slabs ou encore d’influencer la disposition des objets en mémoire du noyau.
