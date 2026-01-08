@@ -102,8 +102,113 @@ Dans le cadre de l’étude du slab allocator et de la sécurité du noyau Linux
 
 La combinaison de plusieurs caractéristiques comme la taille fixe, typage fort mais non vérifié à l’exécution, réutilisation rapide et disposition mémoire prévisible fait des objets kernel une cible privilégiée pour les attaques. En parallèle, ces mêmes propriétés en font une abstraction idéale pour optimiser la gestion mémoire du noyau.
 
-### Slab
-`à compléter...`
+
+
+### <ins>Slab</ins>
+> Slab
+#### Contexte et historique:
+
+Avec l’augmentation de la complexité du noyau Linux et la multiplication des objets kernel, les limites des allocateurs génériques sont rapidement apparues. Les premières approches basées sur `kmalloc` ou des allocateurs de type buddy system étaient efficaces pour gérer des pages mémoire, mais peu adaptées à la gestion intensive d’objets de petite taille, fortement typés et fréquemment alloués/libérés.
+
+C’est dans ce contexte que le concept de **slab allocator** a été introduit à la fin des années 1990 (initialement par Sun Microsystems), puis adopté par Linux. L’idée centrale était de regrouper des objets kernel de même type au sein de blocs mémoire appelés *slabs*, afin de réduire les coûts d’allocation, d’améliorer la localité cache et de limiter la fragmentation.
+
+Le slab devient ainsi une unité intermédiaire entre les pages mémoire physiques et les objets kernel individuels.
+
+---
+> Slab
+#### Définition:
+
+Un **slab** est un ensemble contigu de mémoire, généralement constitué d’une ou plusieurs pages physiques, dédié à contenir des objets kernel **tous du même type et de la même taille**.
+
+Concrètement un slab appartient toujours à un cache précis et contient un nombre fixe d’objets. Ces objets sont soit **libres**, soit **occupés** (**free** ou **used** en anglais )
+
+Chaque slab maintient des métadonnées permettant au noyau de savoir :
+
+- combien d’objets sont alloués
+- combien sont libres
+- où se trouvent les prochaines zones réutilisables
+
+Le slab agit donc comme une sorte de stockage d’objets prêts à l’emploi**, évitant de devoir solliciter le système de gestion de pages à chaque allocation.
+
+---
+> Slab
+#### Organisation interne:
+
+Un slab est généralement composé de deux éléments principaux :
+
+- **la zone de données**, qui contient les objets kernel
+- **les métadonnées**, utilisées pour la gestion interne (freelist, compteurs, états)
+
+Selon l’implémentation (SLAB, SLUB), ces métadonnées peuvent être soit intégrées directement dans le slab soit partiellement stockées dans l’objet lui-même lorsqu’il est libre ou alors gérées via des structures externes. Dans tous les cas, l’objectif reste le même, permettre une allocation et une libération **rapides et déterministes**.
+
+---
+
+> Slab
+#### États d’un slab:
+Un slab peut se trouver dans plusieurs états au cours de son cycle de vie :
+
+- **empty** : aucun objet n’est actuellement alloué
+- **partial** : certains objets sont alloués, d’autres libres
+- **full** : tous les objets sont alloués
+
+Ces états sont cruciaux pour l’allocateur, qui privilégiera :
+
+- un slab *partial* pour une nouvelle allocation
+- un slab *empty* si nécessaire
+- et pourra éventuellement libérer un slab entièrement vide pour récupérer des pages mémoire
+
+Cette gestion fine permet de concilier performance et maîtrise de la consommation mémoire.
+
+---
+> Slab
+#### Spécificités
+
+**1. Conteneur d’objets homogènes**
+
+Un slab ne contient **qu’un seul type d’objet kernel**.
+Cela signifie que tous les objets à l’intérieur ont la même taille, le même type, ont le même alignement et globalement partagent les mêmes contraintes structurelles.
+
+Cette homogénéité simplifie grandement la gestion mémoire et permet une réutilisation extrêmement rapide des objets libérés.
+
+---
+**2. Alignement**
+Les slabs sont faits pour améliorer la localité cache. Les objets sont donc placés les uns à côté des autres en mémoire, ce qui fait que le processeur peut y accéder plus vite. L’alignement respecte les contraintes de l’architecture, donc il n’y a pas de perte de performance. Et comme les accès successifs tombent souvent sur les mêmes lignes de cache, tout devient plus rapide et efficace.
+
+Ce qui améliore significativement les performances, en particulier pour des structures très utilisées comme les `struct file` ou `struct inode`.
+
+---
+**3. Réutilisation agressive**
+
+Lorsqu’un objet est libéré, il retourne simplement dans la freelist du slab, où il peut être réutilisé immédiatement. Cependant, il n’est pas forcément réinitialisé complètement, sans mécanismes de durcissement spécifiques certaine données précédentes peuvent rester en mémoire.
+
+Cette réutilisation rapide est l’un des principaux atouts du slab allocator, mais elle a également un impact direct sur la sécurité.
+
+---
+**4. Prévisibilité mémoire**
+
+Les slabs apportent une organisation mémoire à la fois structurée, répétable et relativement prévisible. Du point de vue des performances, c’est un atout majeur, car cette régularité facilite la gestion et l’accès aux objets. En revanche, du point de vue de la sécurité, cette même prévisibilité peut devenir un avantage pour un attaquant, elle lui permet de forcer la réallocation d’un objet précis, de contrôler l’occupation des slabs ou encore d’influencer la disposition des objets en mémoire du noyau.
+
+---
+> Slab
+#### Lien avec les vulnérabilités
+
+Le slab joue un rôle central dans de nombreuses vulnérabilités kernel.
+
+Dans un scénario de **use-after-free** :
+
+1. un objet est libéré
+2. il reste physiquement dans son slab
+3. un nouvel objet peut être alloué exactement au même emplacement
+
+Si l’attaquant parvient à influencer le type ou le contenu du nouvel objet, il peut donc écraser des champs sensibles, détourner des pointeurs ou encore provoquer une confusion de type.
+
+---
+> Slab
+#### Conclusion
+
+Le slab constitue une brique intermédiaire essentielle entre les objets kernel et les caches du slab allocator. Il permet de regrouper efficacement des objets homogènes, d’optimiser les performances grâce à la localité cache et de réduire drastiquement le coût des allocations répétées.
+
+Cependant, cette organisation structurée et prévisible, combinée à la réutilisation rapide des objets, fait du slab un élément central dans l’analyse et l’exploitation des vulnérabilités du noyau Linux. Comprendre le rôle et le fonctionnement des slabs est donc indispensable avant d’aborder la notion de cache et, plus largement, le fonctionnement global du slab allocator.
 
 ### Cache
 `à compléter...`
