@@ -297,9 +297,99 @@ Le cache constitue la couche de gestion la plus élevée du slab allocator. Il d
 
 Si les objets kernel représentent la cible et les slabs le conteneur physique, le cache est le **chef d’orchestre** de l’allocation mémoire. Sa compréhension est indispensable pour analyser les performances du noyau Linux, mais surtout pour comprendre et exploiter les vulnérabilités liées à la gestion du heap kernel.
 
-## Le slab allocator
+### <ins>Le slab allocator</ins>
 
-`Explication du méchanisme + schéma homemade`
+> Slab allocator
+
+#### Rôle et objectifs:
+
+Le slab allocator est le mécanisme principal utilisé par le noyau Linux pour gérer l’allocation dynamique des objets kernel. Il repose sur les concepts introduits précédemment, à savoir les objets kernel, les slabs et les caches, afin de proposer un modèle d’allocation spécifiquement adapté aux contraintes du noyau.
+
+Contrairement aux allocateurs génériques, le slab allocator part du constat que le noyau manipule en majorité des objets de taille fixe, fortement typés et alloués de manière répétée. L’objectif est donc de rendre ces allocations aussi rapides et peu coûteuses que possible, tout en limitant la fragmentation mémoire et en améliorant la localité cache.
+
+---
+
+> Slab allocator
+
+#### Vue d’ensemble du fonctionnement:
+
+Le fonctionnement du slab allocator peut être vu comme une chaîne hiérarchique. Lorsqu’une allocation est demandée, le noyau commence par identifier le cache correspondant au type ou à la taille de l’objet souhaité. Ce cache va ensuite sélectionner le slab approprié, à partir duquel un objet libre est extrait et retourné à celui l'ayant appelé.
+
+Le chemin suivi est toujours le même la requête passe par le cache, puis par un slab, avant d’aboutir à un objet kernel. Cette organisation permet de séparer clairement les responsabilités et d’optimiser chaque niveau de la gestion mémoire.
+
+---
+
+> Slab allocator
+
+#### Allocation d’un objet:
+
+Lorsqu’un objet kernel est requis, par exemple via `kmem_cache_alloc` ou `kmalloc`, le slab allocator commence par choisir le cache adapté. Dans le cas d’un objet fortement typé, il s’agira d’un cache dédié, tandis que les allocations plus génériques utiliseront un cache de type `kmalloc-*`.
+
+Une fois le cache sélectionné, celui-ci cherche un slab capable de fournir un objet libre. En pratique, un slab partiellement occupé est privilégié, car il permet de réutiliser de la mémoire déjà active. Si aucun slab adéquat n’est disponible, un nouveau slab est alors créé, généralement à partir de pages mémoire fournies par l’allocateur de pages.
+
+L’objet libre est ensuite extrait de la freelist du slab et marqué comme alloué. Selon la configuration du cache, certaines étapes supplémentaires peuvent avoir lieu, comme l’appel d’un constructeur ou l’application de mécanismes de durcissement.
+
+---
+
+> Slab allocator
+
+#### Libération d’un objet:
+
+La libération d’un objet suit une logique symétrique. Lorsque `kfree` ou `kmem_cache_free` est appelé, le slab allocator identifie le cache auquel appartient l’objet, puis le slab précis dans lequel il se trouve. L’objet est alors replacé dans la freelist du slab, et l’état de ce dernier est mis à jour.
+
+Dans la majorité des cas, la mémoire associée à l’objet n’est pas immédiatement rendue au système. L’objet reste présent dans le slab et peut être réalloué très rapidement. Cette approche permet d’éviter des opérations coûteuses sur les pages mémoire, mais implique également que le contenu de l’objet peut persister après sa libération.
+
+---
+
+> Slab allocator
+
+#### Réutilisation et performances:
+
+La réutilisation rapide des objets est l’un des principaux atouts du slab allocator. En conservant les objets récemment libérés à portée immédiate, le noyau réduit drastiquement le coût des allocations répétées. De plus, comme les objets sont regroupés de manière contiguë au sein des slabs, ils bénéficient souvent d’une excellente localité cache.
+
+Ce modèle est particulièrement efficace pour les structures fortement sollicitées, comme les fichiers ouverts, les sockets ou les structures réseau. Dans ces cas, le slab allocator permet d’atteindre des performances difficilement réalisables avec un allocateur plus généraliste.
+
+---
+
+> Slab allocator
+
+#### Modèle mémoire et prévisibilité:
+
+En organisant la mémoire autour de caches spécialisés et de slabs homogènes, le slab allocator introduit un modèle mémoire relativement stable et prévisible. Les allocations et libérations successives ont tendance à suivre des schémas répétitifs, notamment lorsque les mêmes types d’objets sont utilisés en boucle.
+
+Cette prévisibilité est un avantage du point de vue des performances, mais elle a également des conséquences importantes en matière de sécurité. En observant et en contrôlant l’ordre des allocations, il devient possible d’influencer la disposition des objets en mémoire kernel.
+
+---
+
+> Slab allocator
+
+#### Lien avec la sécurité:
+
+De nombreuses vulnérabilités du noyau Linux impliquant le heap reposent directement sur le fonctionnement du slab allocator. Les scénarios de type use-after-free, double free ou confusion de type exploitent souvent la capacité du slab allocator à réallouer rapidement un objet à une adresse déjà utilisée.
+
+Dans ce contexte, comprendre quel cache est utilisé, comment les slabs sont remplis et dans quel ordre les objets sont réutilisés devient essentiel. Même si des mécanismes de durcissement ont été ajoutés au fil du temps, le modèle fondamental du slab allocator reste inchangé et continue de jouer un rôle central dans l’exploitation des failles mémoire.
+
+---
+
+> Slab allocator
+
+#### Implémentations dans Linux:
+
+Il existe plusieurs implémentations du modèle slab dans Linux, notamment SLAB, SLUB et SLOB. Bien que leurs détails internes diffèrent, elles reposent toutes sur les mêmes principes généraux et proposent une organisation similaire de la mémoire kernel.
+
+Dans la pratique, la majorité des systèmes Linux modernes utilisent SLUB, qui simplifie certaines structures internes et améliore les performances, tout en conservant le même modèle cache–slab–objet.
+
+---
+
+> Slab allocator
+
+#### Conclusion:
+
+Le slab allocator constitue le cœur de la gestion mémoire dynamique des objets kernel dans Linux. En exploitant la nature répétitive et typée de ces objets, il permet d’obtenir des performances élevées et une organisation mémoire efficace.
+
+Cependant, cette efficacité repose sur des choix de conception qui introduisent une forte prévisibilité et une réutilisation agressive de la mémoire. Ces caractéristiques, bien que bénéfiques du point de vue des performances, sont également à l’origine de nombreuses vulnérabilités du noyau. Comprendre le fonctionnement du slab allocator est donc indispensable pour analyser à la fois les performances du système et les mécanismes d’exploitation du heap kernel.
+
+
 
 ## Points importants et contraintes 
 
