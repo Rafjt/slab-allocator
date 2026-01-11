@@ -390,6 +390,9 @@ Le slab allocator constitue le cœur de la gestion mémoire dynamique des objets
 Cependant, cette efficacité repose sur des choix de conception qui introduisent une forte prévisibilité et une réutilisation agressive de la mémoire. Ces caractéristiques, bien que bénéfiques du point de vue des performances, sont également à l’origine de nombreuses vulnérabilités du noyau. Comprendre le fonctionnement du slab allocator est donc indispensable pour analyser à la fois les performances du système et les mécanismes d’exploitation du heap kernel.
 
 
+#### Workflow en image
+![Workflow en image](ressources/Workflow.gif)
+
 
 ## Points importants et contraintes 
 
