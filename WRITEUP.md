@@ -9,7 +9,7 @@
     2.2 [Slab](#Slab)
     
     2.3 [Cache](#Cache)
-3. [Le slab allocator](#Le-slab-allocator)
+3. [Slab Allocator](#Slab-Allocator)
 4. [Points importants et contraintes](#Points-importants-et-contraintes)
 5. [Use-cases et utilité](#Use-cases-et-utilité)
 
