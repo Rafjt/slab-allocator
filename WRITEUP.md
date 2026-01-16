@@ -419,8 +419,15 @@ Une façon tout aussi intuitive pour visualiser ce problème, c'est tout simplem
 
 Source photo : [Conférence Ryan Zezeski](https://www.youtube.com/watch?v=UQVd9mZr-jI)
 
+Le slab allocator créé par Jeff Bonwick en 1994 se démarque des anciens modèles de gestion de données de part le fait qu'il sait à quel type d'objets il a affaire. Pour visualiser la tâche du slab allocator, continuons l'analogie des places de parking, nous sommes la mairie d'une ville et nous devons tracer les lignes sur un parking pour éviter que les gens ne fassent n'importe quoi. Néanmoins dans le cas de la heap, c'est comme s'il fallait accomoder de la place à la fois pour des skateboard et pour des paquebots, du fait que tous les objets ont parfois des tailles très différentes. 
 
+C'est pour cela notamment qu'il existe des dizaines de caches différents dans l'implémentation SLUB, comprenant des caches pour stocker des petits objets kernel, comme des gros, des caches généralistes, ainsi que des des caches pour des objets susceptibles de ne pas être des objets kernel, à part, donc. Mais il faut aussi stocker des objets de très grandes tailles ou bien de tailles très précises, pour un type d'objet récurrent que le système peut invoquer à tout moment. 
 
+<img width="1522" height="801" alt="image" src="https://github.com/user-attachments/assets/9a438193-0d53-4adb-9f8f-ff04cdb85fcd" />
+
+Cette capture d'écran nous montre notamment différents types de caches, destinés à référencer différents types d'objets selon leurs tailles ou fonction.
+
+Dans le cas d'une réimplémentation minimale d'un slab allocator, créer autant de caches différents seraient beaucoup trop chronophage. Seuls quelques un suffisent pour répliquer un comportement de slab allocator cohérent dans un environnement de test minimal.
 
 `Rappelez les contraintes de typages et continuez d'investiguer sur plus de détail`
 
