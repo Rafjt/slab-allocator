@@ -407,6 +407,14 @@ Cependant, cette efficacité repose sur des choix de conception qui introduisent
 
 ## Points importants et contraintes 
 
+> Fragmentation
+
+La *fragmentation*, ce terme est évoqué plusieurs fois mais pas encore expliqué. Pour simplifier la vision des choses, imaginez vous chercher une place de parking pendant des heures et vous retrouver devant cela : 
+<img width="351" height="188" alt="image" src="https://github.com/user-attachments/assets/ef72b70b-6357-49b0-b705-5a7f8fdb1596" />
+Eh bien c'est ça la fragmentation, et c'est tout l'enjeu du slab allocator, empêcher de propager des petits bouts de mémoire inutilisés à travers la heap et ainsi, réduire les capacités potentielles de cette dernière en gâchant de l'espace mémoire. 
+Source photo : [Conférence Ryan Zezeski](https://www.youtube.com/watch?v=UQVd9mZr-jI)
+
+
 `Rappelez les contraintes de typages et continuez d'investiguer sur plus de détail`
 
 ## Use-cases et utilité
