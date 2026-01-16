@@ -413,12 +413,17 @@ La *fragmentation*, ce terme est évoqué plusieurs fois mais pas encore expliqu
 
 <img width="351" height="188" alt="image" src="https://github.com/user-attachments/assets/ef72b70b-6357-49b0-b705-5a7f8fdb1596" />
 
-Eh bien c'est ça la fragmentation, et c'est tout l'enjeu du slab allocator, empêcher de propager des petits bouts de mémoire inutilisés à travers la heap et ainsi, réduire les capacités potentielles de cette dernière en gâchant de l'espace mémoire. 
+Eh bien c'est ça la fragmentation, il faut imaginer les bouts de place libres mais trop petites pour y garer sa voiture comme des emplacements mémoire. Et tout l'enjeu du slab allocator, c'est d'empêcher de propager des petits bouts de mémoire inutilisés à travers la heap, ou plus métaphoriquement, coller les voitures les unes aux autres pour avoir le minimum d'espace inutile, car l'inverse réduit les capacités potentielles de la heap en gâchant de l'espace mémoire. 
+
+Une façon tout aussi intuitive pour visualiser ce problème, c'est tout simplement de jouer à Tetris (et perdre), en gros, le slab allocator est un joueur de tetris, celui qui gère le mieux ses slab est le meilleur. 
+
 Source photo : [Conférence Ryan Zezeski](https://www.youtube.com/watch?v=UQVd9mZr-jI)
+
+
 
 
 `Rappelez les contraintes de typages et continuez d'investiguer sur plus de détail`
 
 ## Use-cases et utilité
 
-`Diger la partie poerformance avec des chiffres, parler de son importance pour les exploits`
+`Diger la partie performance avec des chiffres, parler de son importance pour les exploits`
