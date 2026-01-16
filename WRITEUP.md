@@ -329,6 +329,12 @@ Une fois le cache sélectionné, celui-ci cherche un slab capable de fournir un 
 
 L’objet libre est ensuite extrait de la freelist du slab et marqué comme alloué. Selon la configuration du cache, certaines étapes supplémentaires peuvent avoir lieu, comme l’appel d’un constructeur ou l’application de mécanismes de durcissement.
 
+Schéma explicatif : 
+
+<img width="1519" height="850" alt="image" src="https://github.com/user-attachments/assets/096ea1a1-fa43-4556-96f0-c0a02b1ea73d" />
+
+Source: [Kernel Exploitation](https://pwn.college/software-exploitation/kernel-exploitation)
+
 ---
 
 > Slab allocator
