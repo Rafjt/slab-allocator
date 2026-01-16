@@ -297,8 +297,6 @@ Le cache constitue la couche de gestion la plus élevée du slab allocator. Il d
 
 Si les objets kernel représentent la cible et les slabs le conteneur physique, le cache est le **chef d’orchestre** de l’allocation mémoire. Sa compréhension est indispensable pour analyser les performances du noyau Linux, mais surtout pour comprendre et exploiter les vulnérabilités liées à la gestion du heap kernel.
 
-### <ins>Le slab allocator</ins>
-
 ## Slab allocator
 
 #### Rôle et objectifs:
