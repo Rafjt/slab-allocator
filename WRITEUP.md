@@ -27,8 +27,8 @@ Ce write-up a pour objectif de détailler le fonctionnement interne du slab allo
 
 > Le modèle du slab repose sur une hiérarchie de structures clairement définies, allant de l’objet kernel individuel jusqu’aux caches qui organisent leur allocation. Comprendre le rôle et les interactions entre ces composants est essentiel pour appréhender à la fois les choix de conception de l’allocateur et les comportements observables lors des allocations, des libérations et des réutilisations d’objets en mémoire.
 
-### <ins>Objet kernel</ins>
-> Objet kernel
+## Objet kernel
+
 #### Contexte et historique:
 
 Dans un système d’exploitation comme Linux, le noyau manipule en permanence un grand nombre d’entités internes représentant l’état du système : processus, fichiers, sockets, verrous, files d’attente, timers, etc... 
@@ -104,8 +104,8 @@ La combinaison de plusieurs caractéristiques comme la taille fixe, typage fort 
 
 
 
-### <ins>Slab</ins>
-> Slab
+## Slab
+
 #### Contexte et historique:
 
 Avec l’augmentation de la complexité du noyau Linux et la multiplication des objets kernel, les limites des allocateurs génériques sont rapidement apparues. Les premières approches basées sur `kmalloc` ou des allocateurs de type buddy system étaient efficaces pour gérer des pages mémoire, mais peu adaptées à la gestion intensive d’objets de petite taille, fortement typés et fréquemment alloués/libérés.
@@ -207,7 +207,7 @@ Le slab constitue une brique intermédiaire essentielle entre les objets kernel 
 
 Cependant, cette organisation structurée et prévisible, combinée à la réutilisation rapide des objets, fait du slab un élément central dans l’analyse et l’exploitation des vulnérabilités du noyau Linux. Comprendre le rôle et le fonctionnement des slabs est donc indispensable avant d’aborder la notion de cache et, plus largement, le fonctionnement global du slab allocator.
 
-> Cache
+## Cache
 
 #### Définition:
 
@@ -299,7 +299,7 @@ Si les objets kernel représentent la cible et les slabs le conteneur physique, 
 
 ### <ins>Le slab allocator</ins>
 
-> Slab allocator
+## Slab allocator
 
 #### Rôle et objectifs:
 
