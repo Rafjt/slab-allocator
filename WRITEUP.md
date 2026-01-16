@@ -9,7 +9,7 @@
     2.2 [Slab](#Slab)
     
     2.3 [Cache](#Cache)
-3. [Le slab allocator](#Le-slab-allocator)
+3. [Slab Allocator](#Slab-Allocator)
 4. [Points importants et contraintes](#Points-importants-et-contraintes)
 5. [Use-cases et utilité](#Use-cases-et-utilité)
 
@@ -334,6 +334,11 @@ Schéma explicatif :
 
 Source: [Kernel Exploitation](https://pwn.college/software-exploitation/kernel-exploitation)
 
+On peut observer sur ce schéma, à gauche, la présence d'un cache lié à des slabs en activité, un "working slab", et sur la droite, un cache dormant.
+En effet, pour chaque CPU, et pour chaque cache, il y a les slabs actifs et les slabs dormants qui peuvent être invoqués si le système a besoin d'allouer de la mémoire à plus d'objet que sa valeur nominale. Ainsi, lorsque le kernel en aura besoin, il utilisera des slabs partiels pour venir en renfort. 
+
+Ces slabs partiels sont parfois alloués presque entièrement comme visible sur le schéma, on peut voir que 4 slots sur 5 du slab sont déjà alloué mais le fait qu'un d'entre eux se libère, lui permet d'être utilisé à nouveau et favorise donc une gestion de mémoire dynamique et efficace.   
+
 ---
 
 > Slab allocator
@@ -381,6 +386,7 @@ Dans ce contexte, comprendre quel cache est utilisé, comment les slabs sont rem
 #### Implémentations dans Linux:
 
 Il existe plusieurs implémentations du modèle slab dans Linux, notamment SLAB, SLUB et SLOB. Bien que leurs détails internes diffèrent, elles reposent toutes sur les mêmes principes généraux et proposent une organisation similaire de la mémoire kernel.
+Leurs noms peut porter à confusion, il s'agit d'implementation de slab allocator et non d'un simple slab. A savoir que SLAB et SLOB sont aujourd'dui déprécié.
 
 Dans la pratique, la majorité des systèmes Linux modernes utilisent SLUB, qui simplifie certaines structures internes et améliore les performances, tout en conservant le même modèle cache–slab–objet.
 
