@@ -419,7 +419,13 @@ Une façon tout aussi intuitive pour visualiser ce problème, c'est tout simplem
 
 Source photo : [Conférence Ryan Zezeski](https://www.youtube.com/watch?v=UQVd9mZr-jI)
 
+On distingue alors deux types de fragmentations : la **fragmentation externe** et la **fragmentation interne.**
 
+La **fragmentation externe** correspond précisément à la situation décrite dans l’analogie du parking. La mémoire libre existe bien, mais elle est découpée en de multiples blocs trop petits ou mal placés pour satisfaire une nouvelle allocation de taille plus importante. Ainsi, même si la quantité totale de mémoire disponible est suffisante, celle-ci devient inutilisable en pratique, car elle n’est pas contiguë. C’est ce type de fragmentation qui pose historiquement le plus de problèmes dans les allocateurs généralistes, et que le slab allocator cherche principalement à éviter en regroupant des objets homogènes au sein de caches dédiés.
+
+La **fragmentation interne**, quant à elle, est plus subtile. Elle survient lorsque la mémoire allouée à un objet est légèrement supérieure à ce dont il a réellement besoin. Par exemple, si un objet de petite taille est placé dans un bloc plus grand que nécessaire, l’espace restant à l’intérieur de ce bloc est perdu, bien qu’il fasse partie d’une allocation valide. Dans le cadre du slab allocator, cette forme de fragmentation est généralement acceptée et maîtrisée, car les objets stockés dans un même slab sont de taille fixe et alignés selon des contraintes matérielles précises. Ce léger gaspillage interne est alors compensé par une réduction drastique de la fragmentation externe et par de meilleures performances globales.
+
+En pratique, le slab allocator opte donc pour un compromis assumé : limiter autant que possible la fragmentation externe, quitte à tolérer une fragmentation interne faible et contrôlée, afin de garantir une gestion mémoire plus prévisible, plus performante et mieux adaptée aux besoins du kernel.
 
 `Rappelez les contraintes de typages et continuez d'investiguer sur plus de détail`
 
