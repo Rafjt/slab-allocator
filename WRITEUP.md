@@ -421,9 +421,21 @@ Source photo : [Conférence Ryan Zezeski](https://www.youtube.com/watch?v=UQVd9m
 
 
 
-
 `Rappelez les contraintes de typages et continuez d'investiguer sur plus de détail`
 
 ## Use-cases et utilité
+
+Concrètement, qu'est ce que l'arrivée du slab allocator a changé du point de vue des performances et de la technologie de gestion de mémoire de manière générale ? 
+Tout d'abord, le code était plus simple et plus compréhensible que les versions qui l'ont précédéées, environ 3000 lignes de codes furent supprimées de la code base du kernel de Solaris OS 2.4. Ensuite, le code était plus rapide, apparemment beaucoup plus rapide, évidemment, ce nouveau système a énormément réduit la fragmentation passant de **46%** à **14%** en moyenne ce qui est énorme. 
+
+Par ailleurs, le slab allocator est cache-friendly, ce qui signifie que les objets de même type sont stockés de manière contiguë en mémoire, améliorant la localité spatiale et réduisant les défauts de cache lors de leur accès. Mais il est aussi multi-core friendly, ce qui signifie que les allocations et libérations peuvent être effectuées en parallèle sur différents cœurs, en limitant la contention grâce à des structures de données locales (par CPU ou par cache).
+
+Source : [Conférence Ryan Zezeski](https://youtu.be/UQVd9mZr-jI?si=FcM04sIyTeB3yvv5&t=1727)
+
+De manière générale, le slab allocator est un bond technologique en ce qui concerne la gestion de la mémoire et sera adoptée par linux quelques années plus tard pour sa robustesse et son efficacité. Néanmoins, cette technologie possède des failles et des exploit sont possible lorsque sa mise en place n'est pas totalement contrôlée et mal gérée. 
+
+En particulier, le caractère déterministe et typé du slab allocator, qui constitue une force en termes de performances, peut également devenir un vecteur d’attaque. Les attaquants peuvent exploiter la prédictibilité des allocations pour réaliser des techniques de heap feng shui, favorisant la réutilisation contrôlée d’objets libérés (use-after-free), la confusion de types ou encore l’écrasement de métadonnées critiques. Ces vulnérabilités sont d’autant plus exploitables dans le contexte du kernel, où une corruption mémoire peut rapidement mener à une élévation de privilèges.
+
+C’est pour cette raison que les implémentations modernes de slab allocators intègrent de nombreux mécanismes de durcissement, tels que le slab poisoning, les redzones, la randomisation partielle des freelists ou encore des vérifications supplémentaires lors des allocations et libérations. Ces contre-mesures traduisent un compromis permanent entre performances, complexité et sécurité, illustrant le fait que, malgré son apport majeur, le slab allocator n’est pas une solution parfaite mais un socle technologique qui a continuellement évolué pour s’adapter aux nouvelles contraintes matérielles et aux menaces modernes.
 
 `Diger la partie performance avec des chiffres, parler de son importance pour les exploits`
